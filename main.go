@@ -15,14 +15,14 @@ type CounterModel struct {
 }
 
 func NewCounterModel(s live.Socket) *CounterModel {
-  fmt.Println("-> NewCounderModel", s)
+  fmt.Println("-> NewCounterModel", s)
   m, ok := s.Assigns().(*CounterModel)
   if !ok {
     m = &CounterModel{
       Count: 0,
     }
   }
-  fmt.Println("NewCounderModel ->", m)
+  fmt.Println("NewCounterModel ->", m)
   return m
 }
 
