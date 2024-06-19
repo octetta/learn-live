@@ -31,6 +31,20 @@ func CounterMount(ctx context.Context, s live.Socket) (interface{}, error) {
   return NewCounterModel(s), nil
 }
 
+func CounterAdd(ctx context.Context, s live.Socket, p live.Params) (interface{}, error) {
+  fmt.Println("-> CounterAdd", s, p)
+  model := NewCounterModel(s)
+  model.Count += 1
+  return model, nil
+}
+
+func CounterSub(ctx context.Context, s live.Socket, p live.Params) (interface{}, error) {
+  fmt.Println("-> CounterSub", s, p)
+  model := NewCounterModel(s)
+  model.Count -= 1
+  return model, nil
+}
+
 func CounterRender(ctx context.Context, data *live.RenderContext) (io.Reader, error) {
   fmt.Println("-> CounterRender")
   t, err := template.New("counter").Parse(`
@@ -38,7 +52,9 @@ func CounterRender(ctx context.Context, data *live.RenderContext) (io.Reader, er
 <head>
 </head>
 <body>
+<button live-click="sub">-</button>
 <div>{{.Assigns.Count}}</div>
+<button live-click="add">+</button>
 <script src="/live.js"></script>
 </body>
 </html>
@@ -56,16 +72,26 @@ func CounterRender(ctx context.Context, data *live.RenderContext) (io.Reader, er
 func main() {
   fmt.Println("before live.NewHandler")
 	h := live.NewHandler()
+
   fmt.Println("before h.HandleMount")
 	h.HandleMount(CounterMount)
+
   fmt.Println("before h.HandleRender")
   h.HandleRender(CounterRender)
+
+  fmt.Println("before h.HandleEvent")
+  h.HandleEvent("add", CounterAdd)
+  h.HandleEvent("sub", CounterSub)
+
   fmt.Println("before http.Handle /counter")
   http.Handle("/counter", live.NewHttpHandler(live.NewCookieStore("session-name", []byte("weak-secret")), h))
+
   fmt.Println("before http.Handle /live.js")
   http.Handle("/live.js", live.Javascript{})
+
   fmt.Println("before http.Handle /auto.js.map")
   http.Handle("/auto.js.map", live.Javascript{})
+
   fmt.Println("before http.ListenAndServe")
   http.ListenAndServe(":8080", nil)
 }
