@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
-	"log"
+	"fmt"
 	"text/template"
   "io"
 	"net/http"
@@ -15,24 +15,24 @@ type CounterModel struct {
 }
 
 func NewCounterModel(s live.Socket) *CounterModel {
-  log.Println("-> NewCounderModel", s)
+  fmt.Println("-> NewCounderModel", s)
   m, ok := s.Assigns().(*CounterModel)
   if !ok {
     m = &CounterModel{
       Count: 0,
     }
   }
-  log.Println("NewCounderModel ->", m)
+  fmt.Println("NewCounderModel ->", m)
   return m
 }
 
 func CounterMount(ctx context.Context, s live.Socket) (interface{}, error) {
-  log.Println("-> CounterMount", s)
+  fmt.Println("-> CounterMount", s)
   return NewCounterModel(s), nil
 }
 
 func CounterRender(ctx context.Context, data *live.RenderContext) (io.Reader, error) {
-  log.Println("-> CounterRender")
+  fmt.Println("-> CounterRender")
   t, err := template.New("counter").Parse(`
 <html>
 <head>
@@ -54,18 +54,18 @@ func CounterRender(ctx context.Context, data *live.RenderContext) (io.Reader, er
 }
 
 func main() {
-  log.Println("before live.NewHandler")
+  fmt.Println("before live.NewHandler")
 	h := live.NewHandler()
-  log.Println("before h.HandleMount")
+  fmt.Println("before h.HandleMount")
 	h.HandleMount(CounterMount)
-  log.Println("before h.HandleRender")
+  fmt.Println("before h.HandleRender")
   h.HandleRender(CounterRender)
-  log.Println("before http.Handle /counter")
+  fmt.Println("before http.Handle /counter")
   http.Handle("/counter", live.NewHttpHandler(live.NewCookieStore("session-name", []byte("weak-secret")), h))
-  log.Println("before http.Handle /live.js")
+  fmt.Println("before http.Handle /live.js")
   http.Handle("/live.js", live.Javascript{})
-  log.Println("before http.Handle /auto.js.map")
+  fmt.Println("before http.Handle /auto.js.map")
   http.Handle("/auto.js.map", live.Javascript{})
-  log.Println("before http.ListenAndServe")
+  fmt.Println("before http.ListenAndServe")
   http.ListenAndServe(":8080", nil)
 }
